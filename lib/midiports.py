@@ -1,6 +1,8 @@
 import mido
 from lib import connectall
 import time
+import threading
+import queue
 
 class MidiPorts:
     def __init__(self, usersettings):
@@ -48,6 +50,36 @@ class MidiPorts:
                         break
             except:
                 print("no play port")
+        
+        self.output_port = None
+        self.queue = None
+        for outport in mido.get_output_names():
+            print(outport)
+        port = self.usersettings.get_setting_value("output_port")
+        if port != "default":
+            try:
+                self.output_port = mido.open_output(port)
+                self.queue = queue.Queue()
+                self.outputThread = threading.Thread(target=self.send_output, daemon=True)
+                self.outputThread.start()
+                print(f"Output port set to {port}")
+            except:
+                print(f"Can't open output port! {e}")
+        else:
+            #Add output port
+            try:
+                for port in mido.get_output_names():
+                    if "raspberrypi:casio" in port.lower():
+                        self.output_port = mido.open_output(port)
+                        self.queue = queue.Queue()
+                        self.outputThread = threading.Thread(target=self.send_output, daemon=True)
+                        self.outputThread.start()
+                        break
+                print(f"Output port set to {port}")
+            except Exception as e:
+                print(f"Can't open output port! {e}")
+                self.output_port = None
+                self.queue = None
 
         self.portname = "inport"
 
@@ -98,3 +130,15 @@ class MidiPorts:
                 destroy_old.close()
         except:
             print("Can't reconnect play port: " + port)
+    
+    def send_output(self):
+        while True:
+            msg = self.queue.get()
+            if msg is None:
+                break
+            self.output_port.send(msg)
+            time.sleep(0.02)  # sleep for 20 milliseconds
+    
+    def add_to_queue(self, msg):
+        if self.queue is not None:
+            self.queue.put(msg)

@@ -89,6 +89,7 @@
 	<input_port>default</input_port>
 	<secondary_input_port>default</secondary_input_port>
 	<play_port>default</play_port>
+	<output_port>default</output_port>
 
 	<!-- Learn MIDI -->
 	<practice>0</practice>

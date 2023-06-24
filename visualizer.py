@@ -389,6 +389,8 @@ while True:
                     ledstrip.set_adjacent_colors(note_position, Color(0, 0, 0), False)
             if saving.isrecording:
                 saving.add_track("note_off", original_note, velocity, midiports.last_activity)
+            outmsg = mido.Message('note_off', note=int(note))
+            midiports.add_to_queue(outmsg)
         elif int(velocity) > 0 and int(note) > 0 and ledsettings.mode != "Disabled":  # when a note is pressed
             ledsettings.speed_add_note()
             if ledsettings.color_mode == "Multicolor":
@@ -435,6 +437,8 @@ while True:
                                      wc.rgb_to_hex((red, green, blue)))
                 else:
                     saving.add_track("note_on", original_note, velocity, midiports.last_activity)
+            outmsg = mido.Message('note_on', note=int(note), velocity=int(velocity))
+            midiports.add_to_queue(outmsg)
         else:
             control = find_between(str(msg), "control=", " ")
             value = find_between(str(msg), "value=", " ")
