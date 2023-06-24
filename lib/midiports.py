@@ -60,8 +60,6 @@ class MidiPorts:
             try:
                 self.output_port = mido.open_output(port)
                 self.queue = queue.Queue()
-                self.outputThread = threading.Thread(target=self.send_output, daemon=True)
-                self.outputThread.start()
                 print(f"Output port set to {port}")
             except:
                 print(f"Can't open output port! {e}")
@@ -72,15 +70,14 @@ class MidiPorts:
                     if "raspberrypi:casio" in port.lower():
                         self.output_port = mido.open_output(port)
                         self.queue = queue.Queue()
-                        self.outputThread = threading.Thread(target=self.send_output, daemon=True)
-                        self.outputThread.start()
                         break
                 print(f"Output port set to {port}")
             except Exception as e:
                 print(f"Can't open output port! {e}")
                 self.output_port = None
                 self.queue = None
-
+        self.outputThread = threading.Thread(target=self.send_output, daemon=True)
+        self.outputThread.start()
         self.portname = "inport"
 
     def connectall(self):
@@ -96,16 +93,20 @@ class MidiPorts:
         try:
             destroy_old = None
             if port == "inport":
-                destory_old = self.inport
+                destroy_old = self.inport
                 self.inport = mido.open_input(portname)
                 self.usersettings.change_setting_value("input_port", portname)
             elif port == "playport":
-                destory_old = self.playport
+                destroy_old = self.playport
                 self.playport = mido.open_output(portname)
                 self.usersettings.change_setting_value("play_port", portname)
+            elif port == "output_port":
+                destroy_old = self.output_port
+                self.output_port = mido.open_output(portname)
+                self.usersettings.change_setting_value("output_port", portname)
             self.menu.render_message("Changing " + port + " to:", portname, 1500)
             if destroy_old != None:
-                destory_old.close()
+                destroy_old.close()
             self.menu.show()
         except:
             self.menu.render_message("Can't change " + port + " to:", portname, 1500)
@@ -130,14 +131,22 @@ class MidiPorts:
                 destroy_old.close()
         except:
             print("Can't reconnect play port: " + port)
+        try:
+            destroy_old = self.output_port
+            port = self.usersettings.get_setting_value("output_port")
+            self.output_port = mido.open_output(port)
+            if destroy_old != None:
+                time.sleep(0.002)
+                destroy_old.close()
+        except:
+            print("Can't reconnect output port: " + port)
     
     def send_output(self):
         while True:
-            msg = self.queue.get()
-            if msg is None:
-                break
-            self.output_port.send(msg)
             time.sleep(0.02)  # sleep for 20 milliseconds
+            if self.queue is None: continue
+            msg = self.queue.get()
+            if self.output_port is not None and msg is not None: self.output_port.send(msg)
     
     def add_to_queue(self, msg):
         if self.queue is not None:

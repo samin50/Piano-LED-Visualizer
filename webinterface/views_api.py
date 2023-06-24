@@ -241,6 +241,10 @@ def change_setting():
     if setting_name == "play_port":
         webinterface.usersettings.change_setting_value("play_port", value)
         webinterface.midiports.change_port("playport", value)
+    
+    if setting_name == "output_port":
+        webinterface.usersettings.change_setting_value("output_port", value)
+        webinterface.midiports.change_port("outport", value)
 
     if setting_name == "skipped_notes":
         webinterface.usersettings.change_setting_value("skipped_notes", value)
@@ -1417,6 +1421,7 @@ def get_ports():
     response["ports_list"] = ports
     response["input_port"] = webinterface.usersettings.get_setting_value("input_port")
     response["secondary_input_port"] = webinterface.usersettings.get_setting_value("secondary_input_port")
+    response["output_port"] = webinterface.usersettings.get_setting_value("output_port")
     response["play_port"] = webinterface.usersettings.get_setting_value("play_port")
     response["connected_ports"] = str(subprocess.check_output(["aconnect", "-i", "-l"]))
     response["midi_logging"] = webinterface.usersettings.get_setting_value("midi_logging")

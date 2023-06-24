@@ -163,6 +163,11 @@ class MenuLCD:
         element.setAttribute("text", "Playback")
         mc = self.DOMTree.getElementsByTagName("Ports_Settings")[1]
         mc.parentNode.replaceChild(element, mc)
+        element = self.DOMTree.createElement("Ports_Settings")
+        element.appendChild(self.DOMTree.createTextNode(""))
+        element.setAttribute("text", "Output")
+        mc = self.DOMTree.getElementsByTagName("Ports_Settings")[2]
+        mc.parentNode.replaceChild(element, mc)
 
         for port in ports:
             element = self.DOMTree.createElement("Input")
@@ -172,6 +177,12 @@ class MenuLCD:
             mc.appendChild(element)
 
             element = self.DOMTree.createElement("Playback")
+            element.appendChild(self.DOMTree.createTextNode(""))
+            element.setAttribute("text", port)
+            mc = self.DOMTree.getElementsByTagName("Ports_Settings")[1]
+            mc.appendChild(element)
+
+            element = self.DOMTree.createElement("Output")
             element.appendChild(self.DOMTree.createTextNode(""))
             element.setAttribute("text", port)
             mc = self.DOMTree.getElementsByTagName("Ports_Settings")[1]
@@ -930,9 +941,11 @@ class MenuLCD:
             self.midiports.change_port("inport", choice)
         if location == "Playback":
             self.midiports.change_port("playport", choice)
+        if location == "Output":
+            self.midiports.change_port("output_port", choice)
 
         if location == "Ports_Settings":
-            if choice == "Refresh ports" or choice == "Input" or choice == "Playback":
+            if choice == "Refresh ports" or choice == "Input" or choice == "Playback" or choice == "Output":
                 self.update_ports()
 
             if choice == "Reset Bluetooth service":
