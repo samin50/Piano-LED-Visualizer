@@ -61,7 +61,7 @@ class MidiPorts:
                 self.output_port = mido.open_output(port)
                 self.queue = queue.Queue()
                 print(f"Output port set to {port}")
-            except:
+            except Exception as e:
                 print(f"Can't open output port! {e}")
         else:
             #Add output port
