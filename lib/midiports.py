@@ -53,8 +53,11 @@ class MidiPorts:
         
         self.output_port = None
         self.queue = None
+        print("="*20)
+        print("OUTPUT PORT LIST:")
         for outport in mido.get_output_names():
             print(outport)
+        print("="*20)
         port = self.usersettings.get_setting_value("output_port")
         if port != "default":
             try:
